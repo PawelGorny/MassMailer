@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_zus" default="compile.module.zus">
+    <dirname property="module.zus.basedir" file="${ant.file.module_zus}"/>
+
+    <property name="module.jdk.home.zus" value="${project.jdk.home}"/>
+    <property name="module.jdk.bin.zus" value="${project.jdk.bin}"/>
+    <property name="module.jdk.classpath.zus" value="${project.jdk.classpath}"/>
+
+    <property name="compiler.args.zus" value="-encoding UTF-8 -source 8 ${compiler.args}"/>
+
+    <property name="zus.output.dir" value="${module.zus.basedir}/out/production/zus"/>
+    <property name="zus.testoutput.dir" value="${module.zus.basedir}/out/test/zus"/>
+
+    <path id="zus.module.bootclasspath">
+        <!-- Paths to be included in compilation bootclasspath -->
+    </path>
+
+    <path id="zus.module.production.classpath">
+        <path refid="${module.jdk.classpath.zus}"/>
+        <path refid="library.javax.mail.classpath"/>
+    </path>
+
+    <path id="zus.runtime.production.module.classpath">
+        <pathelement location="${zus.output.dir}"/>
+        <path refid="library.javax.mail.classpath"/>
+    </path>
+
+    <path id="zus.module.classpath">
+        <path refid="${module.jdk.classpath.zus}"/>
+        <pathelement location="${zus.output.dir}"/>
+        <path refid="library.javax.mail.classpath"/>
+    </path>
+
+    <path id="zus.runtime.module.classpath">
+        <pathelement location="${zus.testoutput.dir}"/>
+        <pathelement location="${zus.output.dir}"/>
+        <path refid="library.javax.mail.classpath"/>
+    </path>
+
+
+    <patternset id="excluded.from.module.zus">
+        <patternset refid="ignored.files"/>
+    </patternset>
+
+    <patternset id="excluded.from.compilation.zus">
+        <patternset refid="excluded.from.module.zus"/>
+    </patternset>
+
+    <path id="zus.module.sourcepath">
+        <dirset dir="${module.zus.basedir}">
+            <include name="src"/>
+        </dirset>
+    </path>
+
+
+    <target name="compile.module.zus" depends="compile.module.zus.production,compile.module.zus.tests"
+            description="Compile module zus"/>
+
+    <target name="compile.module.zus.production" depends="register.custom.compilers"
+            description="Compile module zus; production classes">
+        <mkdir dir="${zus.output.dir}"/>
+        <javac2 destdir="${zus.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}"
+                memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.zus}/javac">
+            <compilerarg line="${compiler.args.zus}"/>
+            <bootclasspath refid="zus.module.bootclasspath"/>
+            <classpath refid="zus.module.production.classpath"/>
+            <src refid="zus.module.sourcepath"/>
+            <patternset refid="excluded.from.compilation.zus"/>
+        </javac2>
+
+        <copy todir="${zus.output.dir}">
+            <fileset dir="${module.zus.basedir}/src">
+                <patternset refid="compiler.resources"/>
+                <type type="file"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="compile.module.zus.tests" depends="register.custom.compilers,compile.module.zus.production"
+            description="compile module zus; test classes" unless="skip.tests"/>
+
+    <target name="clean.module.zus" description="cleanup module">
+        <delete dir="${zus.output.dir}"/>
+        <delete dir="${zus.testoutput.dir}"/>
+    </target>
+</project>
